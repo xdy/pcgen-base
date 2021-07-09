@@ -17,6 +17,8 @@
  */
 package pcgen.base.formatmanager;
 
+import java.util.Optional;
+
 import pcgen.base.util.FormatManager;
 
 /**
@@ -41,13 +43,14 @@ public class FormatManagerWrapper implements FormatManagerFactory
 	 */
 	public FormatManagerWrapper(FormatManager<?> fmtManager)
 	{
-		formatManager = FormatUtilities.isValid(fmtManager);
+		formatManager = FormatUtilities.ifValid(fmtManager);
 	}
 
 	@Override
-	public FormatManager<?> build(String formatSub, FormatManagerLibrary library)
+	public FormatManager<?> build(Optional<String> parentFormat,
+		Optional<String> formatSub, FormatManagerLibrary library)
 	{
-		if (formatSub == null)
+		if (formatSub.isEmpty())
 		{
 			return formatManager;
 		}

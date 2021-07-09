@@ -79,12 +79,12 @@ public final class FormatUtilities
 	}
 
 	/**
-	 * Initializes the given SimpleFormatManagerLibrary with the known
-	 * FormatManager / FormatManagerFactory objects in the base library.
+	 * Initializes the given SimpleFormatManagerLibrary with the known FormatManager
+	 * objects in the base library.
 	 * 
 	 * @param library
-	 *            The SimpleFormatManagerLibrary to be loaded with the known
-	 *            FormatManager / FormatManagerFactory objects
+	 *            The SimpleFormatManagerLibrary to be loaded with the known FormatManager
+	 *            objects
 	 */
 	public static void loadDefaultFormats(SimpleFormatManagerLibrary library)
 	{
@@ -92,13 +92,27 @@ public final class FormatUtilities
 		library.addFormatManager(STRING_MANAGER);
 		library.addFormatManager(BOOLEAN_MANAGER);
 		library.addFormatManager(ORDEREDPAIR_MANAGER);
-		library.addFormatManagerBuilder(new ArrayFormatFactory());
+	}
+
+	/**
+	 * Initializes the given SimpleFormatManagerLibrary with default FormatManagerFactory
+	 * objects in the base library.
+	 * 
+	 * @param library
+	 *            The SimpleFormatManagerLibrary to be loaded with default
+	 *            FormatManagerFactory objects
+	 */
+	public static void loadDefaultFactories(SimpleFormatManagerLibrary library)
+	{
+		library.addFormatManagerBuilder(new CompoundFormatFactory(',', '|'));
+		library.addFormatManagerBuilder(new ArrayFormatFactory('\n', ','));
+		library.addFormatManagerBuilder(new OptionalFormatFactory());
 	}
 
 	/**
 	 * Returns the given FormatManager if it is a valid FormatManager. Validity means
-	 * basic adherence to the FormatManager interface, meaning getIdentifierType() and
-	 * getManagedClass() may not return null.
+	 * basic adherence to the FormatManager interface, meaning getIdentifierType(),
+	 * getManagedClass(), and getComponentManager() may not return null.
 	 * 
 	 * @param fmtManager
 	 *            The FormatManager to be checked to ensure it is valid
@@ -106,7 +120,7 @@ public final class FormatUtilities
 	 * @throws NullPointerException
 	 *             if the given FormatManager is not valid
 	 */
-	public static FormatManager<?> isValid(FormatManager<?> fmtManager)
+	public static FormatManager<?> ifValid(FormatManager<?> fmtManager)
 	{
 		String fmIdent = fmtManager.getIdentifierType();
 		Class<?> fmFormat = fmtManager.getManagedClass();
@@ -115,6 +129,10 @@ public final class FormatUtilities
 				+ fmFormat + ")");
 		Objects.requireNonNull(fmFormat,
 			"Cannot use a FormatManager with no format (was nominally for Identifier: "
+				+ fmIdent + ")");
+		Objects.requireNonNull(fmtManager.getComponentManager(),
+			"Cannot use a FormatManager with null component manager, "
+				+ "must be Optional.empty() (was nominally for Identifier: "
 				+ fmIdent + ")");
 		return fmtManager;
 	}

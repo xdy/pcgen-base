@@ -17,11 +17,23 @@
  */
 package pcgen.base.graph.inst;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Arrays;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import pcgen.base.graph.base.Edge;
 import pcgen.base.graph.base.Graph;
 
+/**
+ * Test the SimpleListMapGraph class
+ */
 public class SimpleListMapGraphTest extends
 		AbstractGraphTestCase<Edge<Integer>>
 {
@@ -40,28 +52,29 @@ public class SimpleListMapGraphTest extends
 		return new DefaultGraphEdge<>(node1, node2);
 	}
 
-	/**
-	 * Sets up the fixture, for example, open a network connection. This method
-	 * is called before a test is executed.
-	 * 
-	 * @throws Exception
-	 */
 	@Override
-	protected void setUp() throws Exception
+	@BeforeEach
+	void setUp()
 	{
 		super.setUp();
 		strategy = new SimpleListMapGraph<>();
 	}
 
-	/**
-	 * @return Returns the strategy.
-	 */
 	@Override
-	Graph<Integer, Edge<Integer>> getStrategy()
+	@AfterEach
+	void tearDown()
+	{
+		super.tearDown();
+		strategy = null;
+	}
+
+	@Override
+	public Graph<Integer, Edge<Integer>> getStrategy()
 	{
 		return strategy;
 	}
 
+	@Test
 	public void testGetInternalizedNode()
 	{
 		Integer node = new Integer(1);
@@ -85,7 +98,9 @@ public class SimpleListMapGraphTest extends
 		//But that an instance test will fail
 		for (Integer i : strategy.getNodeList())
 		{
+			//Note: Must be INSTANCE IDENTITY, not .equals
 			assertTrue(i == node || i == node2);
+			//Note: Must be INSTANCE IDENTITY, not .equals
 			assertTrue(i != falseNode1);
 		}
 		assertTrue(node == strategy.getInternalizedNode(node));

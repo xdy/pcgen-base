@@ -8,17 +8,25 @@
  * Full build: gradle all 
  */
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: "jacoco"
-apply plugin: 'ivy-publish'
+plugins {
+    id 'com.gradle.build-scan' version '3.6.2'
+    id 'java'
+    id 'eclipse'
+    id "jacoco"
+    id 'ivy-publish'
+    id 'checkstyle'
+    id 'pmd'
+    id "com.github.spotbugs" version '4.7.1'
+    id 'com.github.ben-manes.versions' version '0.39.0'
+}
 
 group = 'net.sourceforge.pcgen'
 description = """PCGen base library"""
 
 defaultTasks 'clean', 'build'
 
-sourceCompatibility = 1.8
+sourceCompatibility = "1.11"
+targetCompatibility = "1.11"
 
 ext {
     majorVersion = 1
@@ -30,7 +38,11 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.7.2'
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.7.2'
+    testImplementation group: 'org.junit.jupiter', name:  'junit-jupiter-api', version: '5.7.2'
+    testImplementation group: 'org.junit.jupiter', name:  'junit-jupiter-params', version: '5.7.2'
+    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.2'
 }
 
 sourceSets {
@@ -49,12 +61,17 @@ sourceSets {
 def testSources = ['**/testsupport/**', '**/Abstract**TestCase', '**/*Test']
 
 test {
+	useJUnitPlatform()
+	reports {
+        junitXml.enabled = true
+        html.enabled = false
+    }
     systemProperties 'property': 'value'
 }
 
 jacocoTestReport {
-    afterEvaluate {
-       	classDirectories = files(classDirectories.files.collect {fileTree(dir: it, exclude: testSources)})
+    afterEvaluate { 
+        getSourceDirectories().setFrom(files(classDirectories.files.collect {fileTree(dir: it, exclude: testSources)}))
     }
     reports {
         html {
@@ -108,8 +125,7 @@ publishing {
     repositories {
         ivy {
             name "fileRepo"
-            url '/home/pcgen1/public_html/librepo'
-            //url 'D:/Projects/pcgen-base/librepo'
+            url '/var/www/librepo'
         }
     }
     publications {
@@ -132,6 +148,10 @@ publishing {
             }
         }
     }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 apply from: 'gradle/reporting.gradle'

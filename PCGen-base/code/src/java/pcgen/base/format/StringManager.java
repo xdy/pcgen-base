@@ -17,16 +17,19 @@
  */
 package pcgen.base.format;
 
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 import pcgen.base.util.BasicIndirect;
+import pcgen.base.util.ComparableManager;
 import pcgen.base.util.FormatManager;
 import pcgen.base.util.Indirect;
 
 /**
  * A StringManager is a FormatManager for dealing with String objects.
  */
-public class StringManager implements FormatManager<String>
+public class StringManager implements FormatManager<String>, ComparableManager<String>
 {
 
 	/**
@@ -90,18 +93,21 @@ public class StringManager implements FormatManager<String>
 		return (o == this) || (o instanceof StringManager);
 	}
 
-	/**
-	 * Returns null, as this FormatManager does not have a component.
-	 */
 	@Override
-	public FormatManager<?> getComponentManager()
+	public Optional<FormatManager<?>> getComponentManager()
 	{
-		return null;
+		return Optional.empty();
 	}
 
 	@Override
 	public boolean isDirect()
 	{
 		return true;
+	}
+
+	@Override
+	public Comparator<String> getComparator()
+	{
+		return String.CASE_INSENSITIVE_ORDER;
 	}
 }

@@ -18,12 +18,18 @@
 package pcgen.base.lang;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 
 /**
  * A Set of utilities related to java.lang.Number.
  */
 public final class NumberUtilities
 {
+
+	/**
+	 * A Comparator for Number.
+	 */
+	public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
 
 	/**
 	 * Private Constructor for Utility Class.
@@ -107,6 +113,25 @@ public final class NumberUtilities
 			return Integer.valueOf(a.intValue() + b.intValue());
 		}
 		return Double.valueOf(a.doubleValue() + b.doubleValue());
+	}
+
+	/**
+	 * Subtracts two numbers, returning the resulting Number. Maintains Integer math if
+	 * possible.
+	 * 
+	 * @param a
+	 *            The Number from which the second Number will be subtracted
+	 * @param b
+	 *            The Number to subtract from the first Number
+	 * @return The result of the subtraction of the two given Numbers
+	 */
+	public static Number subtract(Number a, Number b)
+	{
+		if (a instanceof Integer && b instanceof Integer)
+		{
+			return Integer.valueOf(a.intValue() - b.intValue());
+		}
+		return Double.valueOf(a.doubleValue() - b.doubleValue());
 	}
 
 	/**

@@ -17,8 +17,7 @@
  */
 package pcgen.base.formatmanager;
 
-import java.util.Objects;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 import pcgen.base.format.ArrayFormatManager;
 import pcgen.base.util.FormatManager;
@@ -29,18 +28,48 @@ import pcgen.base.util.FormatManager;
  */
 public class ArrayFormatFactory implements FormatManagerFactory
 {
+	/**
+	 * The list separator character used to parse instructions and separate list items
+	 * that will be part of an array built by a FormatManager produced by this
+	 * ArrayFormatFactory.
+	 */
+	private final char listSep;
 
 	/**
-	 * A pattern to ensure no multidimensional arrays
+	 * The list separator character used to parse instructions and separate groups of
+	 * lists that will be part of an array built by a FormatManager produced by this
+	 * ArrayFormatFactory.
 	 */
-	private static final Pattern ARRAY_PATTERN = Pattern.compile(
-		Pattern.quote("ARRAY["), Pattern.CASE_INSENSITIVE);
+	private final char groupSep;
 
-	@Override
-	public FormatManager<?> build(String subFormatName,
-		FormatManagerLibrary library)
+	/**
+	 * Constructs a new ArrayFormatFactory with the given separator characters.
+	 * 
+	 * @param groupSep
+	 *            The group separator character used to parse instructions and separate
+	 *            groups of lists that will be part of the array in an ArrayFormatManager
+	 *            produced by this factory.
+	 * @param listSep
+	 *            The separator character used to parse lists in the instructions and
+	 *            separate list items that will be part of the array processed by an
+	 *            ArrayFormatManager produced by this factory.
+	 */
+	public ArrayFormatFactory(char groupSep, char listSep)
 	{
-		if (ARRAY_PATTERN.matcher(Objects.requireNonNull(subFormatName)).find())
+		this.groupSep = groupSep;
+		this.listSep = listSep;
+	}
+	
+	@Override
+	public FormatManager<?> build(Optional<String> parentFormat,
+		Optional<String> subFormatName, FormatManagerLibrary library)
+	{
+		if (subFormatName.isEmpty())
+		{
+			throw new IllegalArgumentException("Poorly formatted instructions "
+				+ "(subformat not provided in ArrayFormatFactory)");
+		}
+		if (parentFormat.isPresent())
 		{
 			/*
 			 * This is currently prohibited because - among other things -
@@ -48,11 +77,13 @@ public class ArrayFormatFactory implements FormatManagerFactory
 			 * array
 			 */
 			throw new IllegalArgumentException(
-				"Multidimensional Array format not supported: " + subFormatName
-					+ " may not contain brackets");
+				"Array format not supported inside another format: "
+					+ parentFormat.get() + " may not contain an array");
 		}
 		return new ArrayFormatManager<>(
-			library.getFormatManager(subFormatName), ',');
+			library.getFormatManager(Optional.of(getBuilderBaseFormat()),
+				subFormatName.get()),
+			groupSep, listSep);
 	}
 
 	@Override

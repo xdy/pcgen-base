@@ -17,36 +17,32 @@
  */
 package pcgen.base.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
-
-public class IdentityListTest extends TestCase
+public class IdentityListTest
 {
 
-	private IdentityList<Integer> ls;
 	private Integer a1 = new Integer(1);
 	private Integer a2 = new Integer(2);
 	private Integer b1 = new Integer(1);
 	private Integer b2 = new Integer(2);
 
-	@Override
-	@Before
-	public void setUp()
-	{
-		ls = new IdentityList<>();
-	}
-
 	@Test
 	public void testIdentityAdd()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		assertFalse(ls.contains(a1));
 		assertFalse(ls.contains(b1));
 		assertTrue(ls.isEmpty());
@@ -89,15 +85,7 @@ public class IdentityListTest extends TestCase
 		assertEquals(null, ls.get(0));
 		ls.add(a1);
 		assertEquals(a1, ls.remove(1));
-		try
-		{
-			assertEquals(null, ls.remove(2));
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			//ok
-		}
+		assertThrows(IndexOutOfBoundsException.class, () -> ls.remove(2));
 		assertEquals(1, ls.size());
 		assertEquals(null, ls.get(0));
 	}
@@ -105,20 +93,14 @@ public class IdentityListTest extends TestCase
 	@Test
 	public void testContainsAll()
 	{
-		try
-		{
-			assertFalse(ls.containsAll(null));
-			fail("Not required to take null for containsAll");
-		}
-		catch (NullPointerException e)
-		{
-			//ok
-		}
+		IdentityList<Integer> ls = new IdentityList<>();
+		assertThrows(NullPointerException.class, () -> ls.containsAll(null));
 	}
 
 	@Test
 	public void testIdentityAddAll()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		assertFalse(ls.contains(a1));
 		assertFalse(ls.contains(b1));
 		assertTrue(ls.isEmpty());
@@ -162,6 +144,7 @@ public class IdentityListTest extends TestCase
 	@Test
 	public void testIdentityAddInt()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		assertFalse(ls.contains(a1));
 		assertFalse(ls.contains(b1));
 		assertTrue(ls.isEmpty());
@@ -186,28 +169,14 @@ public class IdentityListTest extends TestCase
 		assertFalse(ls.contains(b1));
 		assertEquals(1, ls.size());
 		assertFalse(ls.isEmpty());
-		try
-		{
-			ls.add(-1, a1);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			//Expected
-		}
-		try
-		{
-			ls.add(2, a1);
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			//Expected
-		}
+		assertThrows(IndexOutOfBoundsException.class, () -> ls.add(-1, a1));
+		assertThrows(IndexOutOfBoundsException.class, () -> ls.add(2, a1));
 	}
 
 	@Test
 	public void testEqualityAdd()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		assertFalse(ls.contains(a1));
 		assertFalse(ls.contains(b1));
 		assertTrue(ls.isEmpty());
@@ -237,6 +206,7 @@ public class IdentityListTest extends TestCase
 	@Test
 	public void testIdentityRemove()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		assertTrue(ls.isEmpty());
 		assertEquals(0, ls.size());
 		ls.add(a1);
@@ -254,18 +224,11 @@ public class IdentityListTest extends TestCase
 	@Test
 	public void testIterator()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		Iterator<Integer> it = ls.iterator();
 		assertNotNull(it);
 		assertFalse(it.hasNext());
-		try
-		{
-			it.next();
-			fail();
-		}
-		catch (NoSuchElementException ise)
-		{
-			// Yes!
-		}
+		assertThrows(NoSuchElementException.class, () -> it.next());
 		ls.add(a1);
 		ls.add(a2);
 		ls.add(b1);
@@ -276,37 +239,24 @@ public class IdentityListTest extends TestCase
 		assertNotNull(iter);
 		assertTrue(iter.hasNext());
 		Object o1 = iter.next();
+		//Yes, this needs to be an identity test, not .equals
 		assertTrue(o1 == a1);
 		assertTrue(iter.hasNext());
 		Object o2 = iter.next();
+		//Yes, this needs to be an identity test, not .equals
 		assertTrue(o2 == b2);
 		assertFalse(iter.hasNext());
-		try
-		{
-			iter.next();
-			fail();
-		}
-		catch (NoSuchElementException ise)
-		{
-			// Yes!
-		}
+		assertThrows(NoSuchElementException.class, () -> iter.next());
 	}
 
 	@Test
 	public void testIteratorRemove()
 	{
+		IdentityList<Integer> ls = new IdentityList<>();
 		Iterator<Integer> it = ls.iterator();
 		assertNotNull(it);
 		assertFalse(it.hasNext());
-		try
-		{
-			it.next();
-			fail();
-		}
-		catch (NoSuchElementException ise)
-		{
-			// Yes!
-		}
+		assertThrows(NoSuchElementException.class, () -> it.next());
 		ls.add(a1);
 		ls.add(b1);
 		ls.add(b2);
@@ -314,39 +264,27 @@ public class IdentityListTest extends TestCase
 		assertNotNull(iter);
 		assertTrue(iter.hasNext());
 		Object o1 = iter.next();
+		//Yes, this needs to be an identity test, not .equals
 		assertTrue(o1 == a1);
 		assertTrue(iter.hasNext());
 		Object o2 = iter.next();
+		//Yes, this needs to be an identity test, not .equals
 		assertTrue(o2 == b1);
 		iter.remove();
 		assertFalse(ls.contains(o2));
 		assertTrue(ls.contains(a1));
 		Object o3 = iter.next();
+		//Yes, this needs to be an identity test, not .equals
 		assertTrue(o3 == b2);
 		assertFalse(iter.hasNext());
-		try
-		{
-			iter.next();
-			fail();
-		}
-		catch (NoSuchElementException ise)
-		{
-			// Yes!
-		}
+		assertThrows(NoSuchElementException.class, () -> iter.next());
 	}
 
 	@Test
 	public void testIdentityAddConstructor()
 	{
-		try
-		{
-			ls = new IdentityList<>(null);
-			fail();
-		}
-		catch (NullPointerException e)
-		{
-			//:)
-		}
+		IdentityList<Integer> ls = new IdentityList<>();
+		assertThrows(NullPointerException.class, () -> new IdentityList<>(null));
 		ls = new IdentityList<>(Arrays.asList(new Integer[]{}));
 		assertFalse(ls.contains(a1));
 		assertFalse(ls.contains(b1));
@@ -385,6 +323,4 @@ public class IdentityListTest extends TestCase
 		ls.add(a2);
 		assertEquals(1, list.size());
 	}
-
-	
 }

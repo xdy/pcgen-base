@@ -1,24 +1,44 @@
+/*
+ * Copyright (c) 2018 Tom Parker <thpr@users.sourceforge.net>
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ */
 package pcgen.base.text;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.NoSuchElementException;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class ParsingSeparatorTest extends TestCase
+/**
+ * Test the ParsingSeparator class
+ */
+public class ParsingSeparatorTest
 {
+	@Test
 	public void testConstructor()
 	{
-		try
-		{
-			new ParsingSeparator(null, ',');
-			fail("Expected ParsingSeparator to reject null base String");
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			//ok
-		}
+		assertThrows(NullPointerException.class, () -> new ParsingSeparator(null, ','));
 	}
 
+	@Test
 	public void testEmpty()
 	{
 		ParsingSeparator separator = new ParsingSeparator("", ',');
@@ -30,7 +50,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 		separator = new ParsingSeparator(",", ',');
 		//before the comma
@@ -48,7 +68,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 		//We are NOT String.split like to consume blanks...
 		separator = new ParsingSeparator(",,", ',');
@@ -70,10 +90,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testMismatchedOpen()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b(c,d", ',');
@@ -88,10 +109,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (ParsingSeparator.GroupingMismatchException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testMismatchedClosed()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b)c,d", ',');
@@ -106,10 +128,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (ParsingSeparator.GroupingMismatchException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testMismatchedOffset()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b(c,[d)]", ',');
@@ -125,10 +148,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (ParsingSeparator.GroupingMismatchException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testSimple()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b(c,d)", ',');
@@ -145,10 +169,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testQuotes()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b\"c,d\"", ',');
@@ -165,10 +190,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testQuotesComplex()
 	{
 		ParsingSeparator separator =
@@ -190,10 +216,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testQuotesEmbedded()
 	{
 		ParsingSeparator separator =
@@ -214,10 +241,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testParenEmbedded()
 	{
 		ParsingSeparator separator =
@@ -238,10 +266,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testParenStart()
 	{
 		ParsingSeparator separator =
@@ -262,10 +291,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testParenEnd()
 	{
 		ParsingSeparator separator =
@@ -284,10 +314,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testBlankEnd()
 	{
 		ParsingSeparator separator =
@@ -308,10 +339,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (NoSuchElementException e)
 		{
-			//ok
+			//expected
 		}
 	}
 
+	@Test
 	public void testAddGroupingPair()
 	{
 		ParsingSeparator separator =
@@ -324,7 +356,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 		try
 		{
@@ -333,7 +365,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 		try
 		{
@@ -342,7 +374,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 		try
 		{
@@ -351,7 +383,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 		//but reuse of same is okay
 		separator.addGroupingPair('(', ')');
@@ -365,7 +397,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 		separator = new ParsingSeparator("a,b\"c,d\",e,f\"g\"", ',');
 		separator.next();
@@ -377,10 +409,11 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (IllegalStateException e)
 		{
-			//ok
+			//expected
 		}
 	}
 	
+	@Test
 	public void testRemove()
 	{
 		ParsingSeparator separator = new ParsingSeparator("a,b\"c,d\"", ',');
@@ -393,7 +426,7 @@ public class ParsingSeparatorTest extends TestCase
 		}
 		catch (UnsupportedOperationException e)
 		{
-			//OK
+			//expected
 		}
 	}
 }

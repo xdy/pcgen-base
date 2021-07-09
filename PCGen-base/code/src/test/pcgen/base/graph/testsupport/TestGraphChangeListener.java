@@ -22,29 +22,44 @@ import pcgen.base.graph.base.EdgeChangeEvent;
 import pcgen.base.graph.base.GraphChangeListener;
 import pcgen.base.graph.base.NodeChangeEvent;
 
+/**
+ * A "transparent" GraphChangeListener that is available for tests to use to diagnose
+ * other classes
+ */
 public class TestGraphChangeListener<T, ET extends Edge<T>> implements
 		GraphChangeListener<T, ET>
 {
 
+	/**
+	 * Last Added Node, public for diagnostics
+	 */
 	public T lastAddNode;
 
+	/**
+	 * Last Added edge, public for diagnostics
+	 */
 	public ET lastAddEdge;
 
+	/**
+	 * Last Removed Node, public for diagnostics
+	 */
 	public T lastRemoveNode;
 
+	/**
+	 * Last Removed Edge, public for diagnostics
+	 */
 	public ET lastRemoveEdge;
 
+	/**
+	 * Added Node Count, public for diagnostics
+	 */
 	public int nodeCount = 0;
 
+	/**
+	 * Added Edge Count, public for diagnostics
+	 */
 	public int edgeCount = 0;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * rpgmapgen.util.graph.event.GraphChangeListener#nodeAdded(rpgmapgen.util
-	 * .graph.event.GraphNodeChangeEvent)
-	 */
 	@Override
 	public void nodeAdded(NodeChangeEvent<T> gce)
 	{
@@ -52,13 +67,6 @@ public class TestGraphChangeListener<T, ET extends Edge<T>> implements
 		nodeCount++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * rpgmapgen.util.graph.event.GraphChangeListener#nodeRemoved(rpgmapgen.
-	 * util.graph.event.GraphNodeChangeEvent)
-	 */
 	@Override
 	public void nodeRemoved(NodeChangeEvent<T> gce)
 	{
@@ -66,13 +74,6 @@ public class TestGraphChangeListener<T, ET extends Edge<T>> implements
 		nodeCount++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * rpgmapgen.util.graph.event.GraphChangeListener#edgeAdded(rpgmapgen.util
-	 * .graph.event.GraphEdgeChangeEvent)
-	 */
 	@Override
 	public void edgeAdded(EdgeChangeEvent<T, ET> gce)
 	{
@@ -80,13 +81,6 @@ public class TestGraphChangeListener<T, ET extends Edge<T>> implements
 		edgeCount++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * rpgmapgen.util.graph.event.GraphChangeListener#edgeRemoved(rpgmapgen.
-	 * util.graph.event.GraphEdgeChangeEvent)
-	 */
 	@Override
 	public void edgeRemoved(EdgeChangeEvent<T, ET> gce)
 	{

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Represents a map where the objects are stored using two keys rather than the
@@ -213,6 +214,26 @@ public class DoubleKeyMap<K1, K2, V> implements Cloneable
 	}
 
 	/**
+	 * If the specified key is not already associated with a value (or is null), computes
+	 * the value using the given BiFunction and puts the computed value into this map.
+	 *
+	 * @param key1
+	 *            The primary key for storing the given value
+	 * @param key2
+	 *            The secondary key for storing the given value
+	 * @param mappingFunction
+	 *            The mappingFunction used to compute a new value for the given keys if no
+	 *            current value is present (or the current vaule is null).
+	 * @return The existing or computed value for the given keys
+	 */
+	public V computeIfAbsent(K1 key1, K2 key2,
+		BiFunction<K1, K2, V> mappingFunction)
+	{
+		return map.computeIfAbsent(key1, k -> createLocalMap())
+			.computeIfAbsent(key2, k2 -> mappingFunction.apply(key1, k2));
+	}
+
+	/**
 	 * Get the value from DoubleKeyMap for the given keys. If this DoubleKeyMap
 	 * does not a mapping for the given keys, null is returned.
 	 * 
@@ -368,8 +389,7 @@ public class DoubleKeyMap<K1, K2, V> implements Cloneable
 	 * @param key1
 	 *            The primary key to retrieve keys for.
 	 * 
-	 * @return A <tt>Set</tt> of secondary key objects for the given primary
-	 *         key.
+	 * @return A Set of secondary key objects for the given primary key.
 	 */
 	public Set<K2> getSecondaryKeySet(K1 key1)
 	{
@@ -531,15 +551,9 @@ public class DoubleKeyMap<K1, K2, V> implements Cloneable
 	{
 		try
 		{
-			return secondClass.newInstance();
+			return secondClass.getConstructor().newInstance();
 		}
-		catch (InstantiationException e)
-		{
-			throw new IllegalArgumentException(
-				"Class for DoubleKeyMap must possess "
-					+ "a zero-argument constructor", e);
-		}
-		catch (IllegalAccessException e)
+		catch (ReflectiveOperationException e)
 		{
 			throw new IllegalArgumentException(
 				"Class for DoubleKeyMap must possess "
@@ -558,15 +572,9 @@ public class DoubleKeyMap<K1, K2, V> implements Cloneable
 	{
 		try
 		{
-			return firstClass.newInstance();
+			return firstClass.getConstructor().newInstance();
 		}
-		catch (InstantiationException e)
-		{
-			throw new IllegalArgumentException(
-				"Class for DoubleKeyMap must possess "
-					+ "a zero-argument constructor", e);
-		}
-		catch (IllegalAccessException e)
+		catch (ReflectiveOperationException e)
 		{
 			throw new IllegalArgumentException(
 				"Class for DoubleKeyMap must possess "

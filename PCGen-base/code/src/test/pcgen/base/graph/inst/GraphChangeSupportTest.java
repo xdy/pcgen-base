@@ -17,46 +17,50 @@
  */
 package pcgen.base.graph.inst;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import pcgen.base.graph.base.Edge;
 import pcgen.base.graph.base.EdgeChangeEvent;
 import pcgen.base.graph.base.Graph;
 import pcgen.base.graph.base.GraphChangeListener;
 import pcgen.base.graph.base.NodeChangeEvent;
 
-public class GraphChangeSupportTest extends TestCase
+/**
+ * Test the GraphChangeSupport class
+ */
+public class GraphChangeSupportTest
 {
 
-	private GraphChangeSupport support;
+	private GraphChangeSupport<Object, Edge<Object>> support;
 
-	/**
-	 * Sets up the fixture, for example, open a network connection. This method
-	 * is called before a test is executed.
-	 * 
-	 * @throws Exception
-	 */
-	@Override
-	protected void setUp() throws Exception
+	@BeforeEach
+	void setUp()
 	{
-		Graph source = new SimpleListGraph();
-		support = new GraphChangeSupport(source);
+		Graph<Object, Edge<Object>> source = new SimpleListGraph<Object, Edge<Object>>();
+		support = new GraphChangeSupport<>(source);
 	}
 
+	@AfterEach
+	void tearDown()
+	{
+		support = null;
+	}
+
+	@Test
 	public void testGraphChangeSupport()
 	{
-		try
-		{
-			new GraphChangeSupport(null);
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException npe)
-		{
-			//We expect this
-		}
+		assertThrows(NullPointerException.class, () -> new GraphChangeSupport<>(null));
 	}
 
+	@Test
 	public void testAddGraphChangeListener()
 	{
 		try
@@ -71,11 +75,12 @@ public class GraphChangeSupportTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testGraphChangeListeners()
 	{
 		assertEquals(0, support.getGraphChangeListeners().length);
-		GraphChangeListener listener = new TransparentGCL();
-		GraphChangeListener alt = new TransparentGCL();
+		GraphChangeListener<Object, Edge<Object>> listener = new TransparentGCL();
+		GraphChangeListener<Object, Edge<Object>> alt = new TransparentGCL();
 		support.addGraphChangeListener(listener);
 		assertEquals(1, support.getGraphChangeListeners().length);
 		assertEquals(listener, support.getGraphChangeListeners()[0]);
@@ -89,11 +94,13 @@ public class GraphChangeSupportTest extends TestCase
 		assertEquals(0, support.getGraphChangeListeners().length);
 	}
 
+	@Test
 	public void testFireGraphEdgeChangeEvent()
 	{
 		//NEEDTEST
 	}
 
+	@Test
 	public void testFireGraphNodeChangeEvent()
 	{
 		TransparentGCL listener = new TransparentGCL();
@@ -107,33 +114,33 @@ public class GraphChangeSupportTest extends TestCase
 		assertEquals(a, listener.nAdded.get(0));
 	}
 
-	private final class TransparentGCL implements GraphChangeListener
+	private final class TransparentGCL implements GraphChangeListener<Object, Edge<Object>>
 	{
-		public List nAdded = new ArrayList<>();
-		public List nRemoved = new ArrayList<>();
-		public List eAdded = new ArrayList<>();
-		public List eRemoved = new ArrayList<>();
+		public List<Object> nAdded = new ArrayList<>();
+		public List<Object> nRemoved = new ArrayList<>();
+		public List<Object> eAdded = new ArrayList<>();
+		public List<Object> eRemoved = new ArrayList<>();
 
 		@Override
-		public void nodeAdded(NodeChangeEvent event)
+		public void nodeAdded(NodeChangeEvent<Object> event)
 		{
 			nAdded.add(event.getGraphNode());
 		}
 
 		@Override
-		public void nodeRemoved(NodeChangeEvent event)
+		public void nodeRemoved(NodeChangeEvent<Object> event)
 		{
 			nRemoved.add(event.getGraphNode());
 		}
 
 		@Override
-		public void edgeAdded(EdgeChangeEvent event)
+		public void edgeAdded(EdgeChangeEvent<Object, Edge<Object>> event)
 		{
 			eAdded.add(event.getGraphEdge());
 		}
 
 		@Override
-		public void edgeRemoved(EdgeChangeEvent event)
+		public void edgeRemoved(EdgeChangeEvent<Object, Edge<Object>> event)
 		{
 			eRemoved.add(event.getGraphEdge());
 		}

@@ -17,63 +17,41 @@
  */
 package pcgen.base.util;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import pcgen.base.format.NumberManager;
 import pcgen.base.format.StringManager;
+import pcgen.testsupport.TestSupport;
 
-public class BasicIndirectTest extends TestCase
+public class BasicIndirectTest
 {
 
 	private BasicIndirect<Number> indirectDouble = new BasicIndirect<>(
-			new NumberManager(), Double.valueOf(4));
+			new NumberManager(), TestSupport.D4);
 	private BasicIndirect<String> indirectString = new BasicIndirect<>(
 			new StringManager(), "Hello!");
 
 	@Test
 	public void testConstructor()
 	{
-		try
-		{
-			//Using .equals to prove a point if this is changed to legal :)
-			new BasicIndirect<>(new StringManager(), null).equals(indirectDouble);
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			// OK
-		}
-		try
-		{
-			new BasicIndirect<>(null, "Hello!");
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			// OK
-		}
-		try
-		{
-			new BasicIndirect<String>(null, null);
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			// OK
-		}
-		try
-		{
-			Object o = 4;
-			//Mess with generics
-			new BasicIndirect(new StringManager(), o);
-			fail();
-		}
-		catch (IllegalArgumentException e)
-		{
-			// OK
-		}
+		//Using .equals to prove a point if this is changed to legal :)
+		assertThrows(NullPointerException.class, () -> new BasicIndirect<>(new StringManager(), null).equals(indirectDouble));
+		assertThrows(NullPointerException.class, () -> new BasicIndirect<>(null, "Hello!"));
+		assertThrows(NullPointerException.class, () -> new BasicIndirect<String>(null, null));
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Test
+	public void testConstructorGenericsViolation()
+	{
+		Object o = 4;
+		//Mess with generics
+		assertThrows(IllegalArgumentException.class, () -> new BasicIndirect(new StringManager(), o));
 	}
 
 	@Test
@@ -103,7 +81,7 @@ public class BasicIndirectTest extends TestCase
 		BasicIndirect<Number> indirectInt =
 				new BasicIndirect<>(
 						new NumberManager(),
-						Integer.valueOf(4)
+						TestSupport.I4
 				);
 		BasicIndirect<Number> indirectDoubleToo =
 				new BasicIndirect<>(
@@ -114,11 +92,11 @@ public class BasicIndirectTest extends TestCase
 				new BasicIndirect<>(new StringManager(), "Hi!");
 		assertTrue(indirectDouble.equals(indirectDoubleToo));
 		assertTrue(indirectDoubleToo.equals(indirectDouble));
+		assertEquals(indirectDouble.hashCode(), indirectDoubleToo.hashCode());
+		assertFalse(indirectDouble.equals(new Object()));
 		assertFalse(indirectDouble.equals(indirectInt));
 		assertFalse(indirectDouble.equals(indirectString));
 		assertFalse(indirectString.equals(indirectStringHi));
 		assertFalse(indirectStringHi.equals(indirectString));
 	}
-
-
 }

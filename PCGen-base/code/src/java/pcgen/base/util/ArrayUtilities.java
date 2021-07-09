@@ -16,12 +16,17 @@
 package pcgen.base.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.IntFunction;
 
 /**
  * ArrayUtilities is a utility class designed to provide utility methods when working with
  * Arrays.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ArrayUtilities
 {
 
@@ -105,6 +110,249 @@ public final class ArrayUtilities
 	public static <T> IntFunction<T[]> usingArray(T[] candidateArray)
 	{
 		return x -> ensureSizedArray(x, candidateArray);
+	}
+
+	/**
+	 * Merges two arrays of a given Class.
+	 * 
+	 * If either array is null, the other array is directly returned. If either array is
+	 * empty, the other array is directly returned. If one is null and the other is empty,
+	 * the empty array is returned. Note in NONE of those cases is the returned array
+	 * different than the original - so this method is NOT insulating against modification
+	 * of the original arrays.
+	 *
+	 * @param arrayClass
+	 *            The class of the resulting array to be built
+	 * @param first
+	 *            The first array to be merged
+	 * @param second
+	 *            The second array to be merged
+	 * @return A merged array containing the contents of the two given arrays
+	 * @param <T>
+	 *            The component type of the Arrays to be merged
+	 */
+	public static <T> T[] mergeArray(Class<T> arrayClass, T[] first, T[] second)
+	{
+		if (first == null)
+		{
+			return second;
+		}
+		if ((second == null) || (second.length == 0))
+		{
+			return first;
+		}
+		if (first.length == 0)
+		{
+			return second;
+		}
+		T[] returnArray = buildOfClass(arrayClass).apply(first.length + second.length);
+		System.arraycopy(first, 0, returnArray, 0, first.length);
+		System.arraycopy(second, 0, returnArray, first.length, second.length);
+		return returnArray;
+	}
+
+	/**
+	 * Calculates the difference between two arrays, using identity comparison.
+	 * 
+	 * null is tolerated and treated as an empty array.
+	 * 
+	 * @param oldArray
+	 *            The "old" array for comparison
+	 * @param newArray
+	 *            The "new" array for comparison
+	 * @return A Tuple indicating the items removed (present in the "old" array but not
+	 *         the "new" array) and the items added (present in the "new" array, but not
+	 *         the "old" array)
+	 * @param <T>
+	 *            The component type of the Arrays to be compared
+	 */
+	public static <T> Tuple<List<T>, List<T>> calculateIdentityDifference(T[] oldArray, T[] newArray)
+	{
+		if (oldArray == null)
+		{
+			if (newArray == null)
+			{
+				return new Tuple<>(Collections.emptyList(),
+					Collections.emptyList());
+			}
+			return new Tuple<>(Collections.emptyList(),
+				new IdentityList<>(Arrays.asList(newArray)));
+		}
+		if (newArray == null)
+		{
+			return new Tuple<>(new IdentityList<>(Arrays.asList(oldArray)),
+				Collections.emptyList());
+		}
+		List<T> oldList = Arrays.asList(oldArray);
+		List<T> newList = new IdentityList<>(Arrays.asList(newArray));
+		return processComparison(oldList, newList);
+	}
+
+	/**
+	 * Calculates the difference between two arrays, using object .equals comparison.
+	 * 
+	 * @param oldArray
+	 *            The "old" array for comparison
+	 * @param newArray
+	 *            The "new" array for comparison
+	 * @return A Tuple indicating the items removed (present in the "old" array but not
+	 *         the "new" array) and the items added (present in the "new" array, but not
+	 *         the "old" array)
+	 * @param <T>
+	 *            The component type of the Arrays to be compared
+	 */
+	public static <T> Tuple<List<T>, List<T>> calculateDifference(T[] oldArray, T[] newArray)
+	{
+		List<T> oldList = Arrays.asList(oldArray);
+		List<T> newList = new ArrayList<>(Arrays.asList(newArray));
+		return processComparison(oldList, newList);
+	}
+
+	/**
+	 * Calculates the difference between two arrays, using the comparison method on the
+	 * given "new" List.
+	 * 
+	 * @param oldList
+	 *            The "old" array for comparison
+	 * @param newList
+	 *            The "new" array for comparison
+	 * @return A Tuple indicating the items removed (present in the "old" array but not
+	 *         the "new" array) and the items added (present in the "new" array, but not
+	 *         the "old" array)
+	 * @param <T>
+	 *            The component type of the Arrays to be compared
+	 */
+	private static <T> Tuple<List<T>, List<T>> processComparison(List<T> oldList,
+		List<T> newList)
+	{
+		List<T> removedList = new ArrayList<>(oldList.size());
+		for (T oldObject : oldList)
+		{
+			if (!newList.remove(oldObject))
+			{
+				removedList.add(oldObject);
+			}
+		}
+		return new Tuple<>(removedList, newList);
+	}
+
+	/**
+	 * Clones an array, adding 1 to the length, and placing the given object at the
+	 * beginning of the new array. The length of the new array will be the length of the
+	 * given array + 1. null is a legal value for the given array.
+	 * 
+	 * @param object
+	 *            The object to be placed at the beginning of the returned array
+	 * @param array
+	 *            The original array, to be placed in the latter portion of the new array
+	 * @param arrayClass
+	 *            The class of the component in the array to be returned
+	 * @return A new array with the given object as the first object and the current
+	 *         contents of the array as the rest of the contents.
+	 * @param <T>
+	 *            The type of the array and the object to be added to the array
+	 */
+	public static <T> T[] prependOnCopy(T object, T[] array, Class<T> arrayClass)
+	{
+		return addOnCopy(array, 0, object, arrayClass);
+	}
+
+	/**
+	 * Clones an array, adding 1 to the length, and placing the given object at the end of
+	 * the new array. The length of the new array will be the length of the given array +
+	 * 1. null is a legal value for the given array.
+	 * 
+	 * @param object
+	 *            The object to be placed at the end of the returned array
+	 * @param array
+	 *            The original array, to be placed in the latter portion of the new array
+	 * @param arrayClass
+	 *            The class of the component in the array to be returned
+	 * @return A new array with the contents of the given array as the first set of the
+	 *         contents and the given object as the last element
+	 * @param <T>
+	 *            The type of the array and the object to be added to the array
+	 */
+	public static <T> T[] addOnCopy(T[] array, T object, Class<T> arrayClass)
+	{
+		return addOnCopy(array, (array == null) ? 0 : array.length, object, arrayClass);
+	}
+
+	/**
+	 * Clones an array, adding 1 to the length, and placing the given object at the given
+	 * index. Otherwise, the order of the objects in the given array is maintained. The
+	 * length of the new array will be the length of the given array + 1. null is a legal
+	 * value for the given array.
+	 * 
+	 * @param array
+	 *            The original array, to be placed in the latter portion of the new array
+	 * @param index
+	 *            The index at which the given object will be placed
+	 * @param object
+	 *            The object to be inserted into the array at the given index
+	 * @param arrayClass
+	 *            The class of the component in the array to be returned
+	 * @return A new array with the contents of the given array as the first set of the
+	 *         contents and the given object as the last object
+	 * @param <T>
+	 *            The type of the array and the object to be added to the array
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] addOnCopy(T[] array, int index, T object, Class<T> arrayClass)
+	{
+		T[] newArray;
+		if (array == null)
+		{
+			newArray = (T[]) Array.newInstance(arrayClass, 1);
+		}
+		else
+		{
+			int origSize = array.length;
+			int newSize = (origSize + 1);
+			newArray = (T[]) Array.newInstance(arrayClass, newSize);
+			if (index != 0)
+			{
+				System.arraycopy(array, 0, newArray, 0, index);
+			}
+			if (index != origSize)
+			{
+				System.arraycopy(array, index, newArray, index + 1, origSize - index);
+			}
+		}
+		newArray[index] = object;
+		return newArray;
+	}
+
+	/**
+	 * Clones an array, removing 1 from the length, by removing the object at the given
+	 * index in the given array. Other than the removal, the order of the objects in the
+	 * given array is maintained. The length of the new array will be the length of the
+	 * given array - 1.
+	 * 
+	 * @param array
+	 *            The original array
+	 * @param index
+	 *            The index location of the object to be removed from the array
+	 * @return A new array with the object at the given index in the original array
+	 *         removed.
+	 * @param <T>
+	 *            The type of object in the array
+	 */
+	public static <T> T[] removeOnCopy(T[] array, int index)
+	{
+		int newSize = array.length - 1;
+		@SuppressWarnings("unchecked")
+		T[] newArray =
+				(T[]) Array.newInstance(array.getClass().getComponentType(), newSize);
+		if (index != 0)
+		{
+			System.arraycopy(array, 0, newArray, 0, index);
+		}
+		if (index != newSize)
+		{
+			System.arraycopy(array, index + 1, newArray, index, newSize - index);
+		}
+		return newArray;
 	}
 
 }

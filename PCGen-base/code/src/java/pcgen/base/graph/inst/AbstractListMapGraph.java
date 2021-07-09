@@ -34,6 +34,7 @@ import pcgen.base.graph.base.EdgeChangeEvent;
 import pcgen.base.graph.base.Graph;
 import pcgen.base.graph.base.GraphChangeListener;
 import pcgen.base.graph.base.NodeChangeEvent;
+import pcgen.base.graph.util.GraphUtilities;
 
 /**
  * This Graph uses redundant storage to improve query speed for certain methods.
@@ -295,11 +296,8 @@ public abstract class AbstractListMapGraph<N, ET extends Edge<N>> implements
 		 * ConcurrentModificationException (since the set for GraphNode gn would
 		 * be modified by removeEdge while inside this Iterator).
 		 */
-		for (ET edge : nodeEdgeMap.remove(node))
-		{
-			// FUTURE Consider Check of return values of removeEdge here to ensure success??
-			removeEdge(edge);
-		}
+		// FUTURE Consider Check of return values of removeEdge here to ensure success??
+		nodeEdgeMap.remove(node).forEach(edge -> removeEdge(edge));
 		/*
 		 * containsNode test means we don't need to check return value of remove
 		 * we 'know' it is present (barring an internal error!). This remove
@@ -408,48 +406,8 @@ public abstract class AbstractListMapGraph<N, ET extends Edge<N>> implements
 	@Override
 	public boolean equals(Object other)
 	{
-		if (!(other instanceof Graph))
-		{
-			return false;
-		}
-		@SuppressWarnings("unchecked")
-		Graph<N, ET> otherGraph = (Graph<N, ET>) other;
-		List<N> otherNodeList = otherGraph.getNodeList();
-		int thisNodeSize = nodeList.size();
-		if (thisNodeSize != otherNodeList.size())
-		{
-			//			System.err.println("Not equal node count");
-			return false;
-		}
-		// (potentially wasteful, but defensive copy)
-		otherNodeList = new ArrayList<>(otherNodeList);
-		if (otherNodeList.retainAll(nodeList))
-		{
-			// Some nodes are not identical
-			//			System.err.println("Not equal node list");
-			//			System.err.println(nodeList);
-			//			System.err.println(otherNodeList);
-			return false;
-		}
-		// Here, the node lists are identical...
-		List<ET> otherEdgeList = otherGraph.getEdgeList();
-		int thisEdgeSize = edgeList.size();
-		if (thisEdgeSize != otherEdgeList.size())
-		{
-			//			System.err.println("Not equal edge count");
-			return false;
-		}
-		// (potentially wasteful, but defensive copy)
-		otherEdgeList = new ArrayList<>(otherEdgeList);
-		if (otherEdgeList.retainAll(edgeList))
-		{
-			// Other Graph contains extra edges
-			//			System.err.println("not equal edge retain");
-			//			System.err.println(edgeList);
-			//			System.err.println(otherEdgeList);
-			return false;
-		}
-		return true;
+		return (other instanceof Graph)
+				&& GraphUtilities.equals(this, (Graph<?, ?>) other);
 	}
 
 	/**

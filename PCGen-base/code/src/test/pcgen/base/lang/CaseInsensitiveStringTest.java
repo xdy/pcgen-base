@@ -17,25 +17,23 @@
  */
 package pcgen.base.lang;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CaseInsensitiveStringTest extends TestCase
+/**
+ * Test the CaseInsensitiveString class
+ */
+public class CaseInsensitiveStringTest
 {
 
 	@Test
 	public void testNullConstructor()
 	{
-		try
-		{
-			new CaseInsensitiveString(null);
-			fail("Expected CaseInsensitiveString to reject null argument in constructor");
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			//OK
-		}
+		assertThrows(NullPointerException.class, () -> new CaseInsensitiveString(null));
 	}
 	
 	@Test
@@ -86,11 +84,14 @@ public class CaseInsensitiveStringTest extends TestCase
 		assertFalse(cis2.equals(cis1));
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void testString()
 	{
 		CaseInsensitiveString cis1 = new CaseInsensitiveString("Foo");
+		//Should fail both ways
 		assertFalse(cis1.equals("Foo"));
+		assertFalse("Foo".equals(cis1));
 	}
 
 	@Test

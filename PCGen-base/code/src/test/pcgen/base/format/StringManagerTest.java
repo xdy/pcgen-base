@@ -16,84 +16,118 @@
  */
 package pcgen.base.format;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class StringManagerTest extends TestCase
+import java.util.Comparator;
+
+import org.junit.jupiter.api.Test;
+
+import pcgen.base.formatmanager.FormatUtilities;
+import pcgen.base.util.FormatManager;
+import pcgen.base.util.SimpleValueStore;
+
+/**
+ * Test the StringManager class
+ */
+public class StringManagerTest
 {
-	private StringManager manager = new StringManager();
-
+	@Test
 	public void testConvertFailNull()
 	{
-		try
-		{
-			manager.convert(null);
-			fail("null value should fail");
-		}
-		catch (NullPointerException | IllegalArgumentException e)
-		{
-			//ok
-		}
+		assertThrows(NullPointerException.class, () -> FormatUtilities.STRING_MANAGER.convert(null));
 	}
 
+	@Test
 	public void testUnconvertFailNull()
 	{
-		try
-		{
-			manager.unconvert(null);
-			fail("null value should fail");
-		}
-		catch (NullPointerException | IllegalArgumentException e)
-		{
-			//ok
-		}
+		assertThrows(NullPointerException.class, () -> FormatUtilities.STRING_MANAGER.unconvert(null));
 	}
 
+	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public void testUnconvertFailObject()
+	{
+		//Yes generics are being violated in order to do this test
+		FormatManager formatManager = FormatUtilities.STRING_MANAGER;
+		assertThrows(ClassCastException.class, () -> formatManager.unconvert(new Object()));
+	}
+
+	@Test
 	public void testConvertIndirectFailNull()
 	{
-		try
-		{
-			manager.convertIndirect(null);
-			fail("null value should fail");
-		}
-		catch (NullPointerException | IllegalArgumentException e)
-		{
-			//ok
-		}
+		assertThrows(NullPointerException.class, () -> FormatUtilities.STRING_MANAGER.convertIndirect(null));
 	}
 
+	@Test
 	public void testConvert()
 	{
-		assertEquals("1", manager.convert("1"));
-		assertEquals("abc", manager.convert("abc"));
+		assertEquals("1", FormatUtilities.STRING_MANAGER.convert("1"));
+		assertEquals("abc", FormatUtilities.STRING_MANAGER.convert("abc"));
 	}
 
+	@Test
 	public void testUnconvert()
 	{
-		assertEquals("1", manager.unconvert("1"));
-		assertEquals("abc", manager.unconvert("abc"));
+		assertEquals("1", FormatUtilities.STRING_MANAGER.unconvert("1"));
+		assertEquals("abc", FormatUtilities.STRING_MANAGER.unconvert("abc"));
 	}
 
+	@Test
 	public void testConvertIndirect()
 	{
-		assertEquals("1", manager.convertIndirect("1").get());
-		assertEquals("gfd", manager.convertIndirect("gfd").get());
+		assertEquals("1", FormatUtilities.STRING_MANAGER.convertIndirect("1").get());
+		assertEquals("gfd", FormatUtilities.STRING_MANAGER.convertIndirect("gfd").get());
 	}
 
+	@Test
 	public void testGetIdentifier()
 	{
-		assertEquals("STRING", manager.getIdentifierType());
+		assertEquals("STRING", FormatUtilities.STRING_MANAGER.getIdentifierType());
 	}
 
+	@Test
+	public void testGetComparator()
+	{
+		Comparator<String> comparator = new StringManager().getComparator();
+		assertEquals(0, comparator.compare("A", "A"));
+		assertEquals(-1, comparator.compare("A", "AB"));
+		assertEquals(1, comparator.compare("BA", "AB"));
+		assertEquals(0, comparator.compare("A", "a"));
+	}
+
+	@Test
 	public void testHashCodeEquals()
 	{
-		assertEquals(new StringManager().hashCode(), manager.hashCode());
-		assertFalse(manager.equals(new Object()));
-		assertFalse(manager.equals(new BooleanManager()));
-		assertTrue(manager.equals(new StringManager()));
+		assertEquals(new StringManager().hashCode(), FormatUtilities.STRING_MANAGER.hashCode());
+		assertFalse(FormatUtilities.STRING_MANAGER.equals(new Object()));
+		assertFalse(FormatUtilities.STRING_MANAGER.equals(new BooleanManager()));
+		assertTrue(FormatUtilities.STRING_MANAGER.equals(new StringManager()));
 	}
 
+	@Test
 	public void testGetComponent()
 	{
-		assertNull(manager.getComponentManager());
+		assertTrue(FormatUtilities.STRING_MANAGER.getComponentManager().isEmpty());
+	}
+
+	@Test
+	public void testIsDirect()
+	{
+		assertTrue(FormatUtilities.STRING_MANAGER.isDirect());
+	}
+
+	@Test
+	public void testInitializeFrom()
+	{
+		SimpleValueStore valueStore = new SimpleValueStore();
+		valueStore.addValueFor(FormatUtilities.STRING_MANAGER.getIdentifierType(), "");
+		Object value = FormatUtilities.STRING_MANAGER.initializeFrom(valueStore);
+		assertEquals("", value);
+		valueStore.addValueFor(FormatUtilities.STRING_MANAGER.getIdentifierType(), "Hi");
+		value = FormatUtilities.STRING_MANAGER.initializeFrom(valueStore);
+		assertEquals("Hi", value);
 	}
 }

@@ -19,11 +19,6 @@
  */
 package pcgen.base.graph.inst;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import pcgen.base.graph.base.DirectionalEdge;
 import pcgen.base.graph.base.DirectionalGraph;
 
@@ -76,84 +71,4 @@ import pcgen.base.graph.base.DirectionalGraph;
 public class DirectionalSetMapGraph<N, ET extends DirectionalEdge<N>> extends
 		AbstractSetMapGraph<N, ET> implements DirectionalGraph<N, ET>
 {
-	/**
-	 * Returns a List of the Edges for which the given Node is a Sink.
-	 * 
-	 * Ownership of the returned List is transferred to the calling Object. No
-	 * reference to the List Object is maintained by DirectionalSetMapGraph.
-	 * However, the Edges contained in the List are returned BY REFERENCE, and
-	 * modification of the returned Edges will modify the Edges contained within
-	 * the DirectionalSetMapGraph.
-	 */
-	@Override
-	public List<ET> getInwardEdgeList(N node)
-	{
-		Set<ET> adjacentEdgeList = getAdjacentEdges(node);
-		if (adjacentEdgeList == null)
-		{
-			return null;
-		}
-		return adjacentEdgeList.stream()
-							   .filter(edge -> edge.isSink(node))
-							   .collect(Collectors.toCollection(ArrayList::new));
-	}
-
-	/**
-	 * Returns a List of the Edges for which the given Node is a source.
-	 * 
-	 * Ownership of the returned List is transferred to the calling Object. No
-	 * reference to the List Object is maintained by DirectionalSetMapGraph.
-	 * However, the Edges contained in the List are returned BY REFERENCE, and
-	 * modification of the returned Edges will modify the Edges contained within
-	 * the DirectionalSetMapGraph.
-	 */
-	@Override
-	public List<ET> getOutwardEdgeList(N node)
-	{
-		Set<ET> adjacentEdgeList = getAdjacentEdges(node);
-		if (adjacentEdgeList == null)
-		{
-			return null;
-		}
-		return adjacentEdgeList.stream()
-							   .filter(edge -> edge.isSource(node))
-							   .collect(Collectors.toCollection(ArrayList::new));
-	}
-
-	@Override
-	public boolean hasInwardEdge(N node)
-	{
-		Set<ET> adjacentEdgeList = getAdjacentEdges(node);
-		if (adjacentEdgeList == null)
-		{
-			return false;
-		}
-		for (ET edge : adjacentEdgeList)
-		{
-			if (edge.isSink(node))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean hasOutwardEdge(N node)
-	{
-		Set<ET> adjacentEdgeList = getAdjacentEdges(node);
-		if (adjacentEdgeList == null)
-		{
-			return false;
-		}
-		for (ET edge : adjacentEdgeList)
-		{
-			if (edge.isSource(node))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 }

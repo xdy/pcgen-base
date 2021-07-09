@@ -223,16 +223,12 @@ public abstract class AbstractMapToList<K, V> implements MapToList<K, V>
 	@Override
 	public void addAllLists(MapToList<K, V> mtl)
 	{
-		for (K key : mtl.getKeySet())
-		{
-			/*
-			 * Note, this grab of the list for the key is safe regardless of
-			 * whether mtl's getListFor is reference or value-semantic, as
-			 * addAllToListFor is committed to be value-semantic and not keep or
-			 * modify the received list.
-			 */
-			addAllToListFor(key, mtl.getListFor(key));
-		}
+		/*
+		 * Note, this grab of the list for the key is safe regardless of whether mtl's
+		 * getListFor is reference or value-semantic, as addAllToListFor is committed to
+		 * be value-semantic and not keep or modify the received list.
+		 */
+		mtl.getKeySet().forEach(key -> addAllToListFor(key, mtl.getListFor(key)));
 	}
 
 	/**
@@ -394,7 +390,8 @@ public abstract class AbstractMapToList<K, V> implements MapToList<K, V>
 	@Override
 	public List<V> getSafeListFor(K key)
 	{
-		return Optional.ofNullable(getListFor(key)).orElse(Collections.emptyList());
+		return Optional.ofNullable(getListFor(key))
+			.orElseGet(() -> Collections.emptyList());
 	}
 
 	/**
@@ -440,6 +437,7 @@ public abstract class AbstractMapToList<K, V> implements MapToList<K, V>
 	 *            The element to be removed from the given list
 	 * @return true if the object is returned; false otherwise
 	 */
+	@SuppressWarnings("PMD.DefaultPackage")
 	boolean removeFromList(List<V> list, V valueElement)
 	{
 		return list.remove(valueElement);

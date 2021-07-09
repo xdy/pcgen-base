@@ -16,168 +16,144 @@
  */
 package pcgen.base.format;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Arrays;
+import java.util.Optional;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class ArrayFormatManagerTest extends TestCase
+import pcgen.base.util.FormatManager;
+import pcgen.base.util.Indirect;
+import pcgen.base.util.SimpleValueStore;
+import pcgen.testsupport.TestSupport;
+
+/**
+ * Test the ArrayFormatManager class
+ */
+public class ArrayFormatManagerTest
 {
-	private static final Number[] ARR_N3_4_5 = {Integer.valueOf(-3), Integer.valueOf(4), Integer.valueOf(5)};
-	private static final Number[] ARR_N3_4P1_5 = {Integer.valueOf(-3), Double.valueOf(4.1), Integer.valueOf(5)};
-	private static final Number[] ARR_1P4 = {Double.valueOf(1.4)};
-	private static final Number[] ARR_N3 = {Integer.valueOf(-3)};
-	private static final Number[] ARR_1 = {Integer.valueOf(1)};
-	
-	private ArrayFormatManager<Number> manager = new ArrayFormatManager<>(
-		new NumberManager(), ',');
-
+	@Test
 	public void testConstructor()
 	{
-		try
-		{
-			new ArrayFormatManager(null, ',');
-			fail("null value should fail");
-		}
-		catch (IllegalArgumentException | NullPointerException e)
-		{
-			//ok as well
-		}
+		assertThrows(NullPointerException.class, () -> new ArrayFormatManager<>(null, '\n', ','));
 	}
 
+	@Test
 	public void testConvertFailNotNumeric()
 	{
-		try
-		{
-			manager.convert("SomeString");
-			fail("null value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convert("SomeString"));
 	}
 
+	@Test
 	public void testUnconvertFailNull()
 	{
-		try
-		{
-			manager.unconvert(null);
-			fail("null value should fail");
-		}
-		catch (NullPointerException | IllegalArgumentException e)
-		{
-			//ok
-		}
+		assertThrows(NullPointerException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.unconvert(null));
 	}
 
+	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public void testUnconvertFailObject()
+	{
+		//Yes, generics violated
+		FormatManager formatManager = TestSupport.NUMBER_ARRAY_MANAGER;
+		assertThrows(ClassCastException.class, () -> formatManager.unconvert(new Object()));
+	}
+
+	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public void testUnconvertFailUnderlying()
+	{
+		//Yes, generics violated
+		FormatManager formatManager = TestSupport.NUMBER_ARRAY_MANAGER;
+		assertThrows(ClassCastException.class, () -> formatManager.unconvert(1));
+	}
+
+	@Test
 	public void testConvertIndirectFailNotNumeric()
 	{
-		try
-		{
-			manager.convertIndirect("SomeString");
-			fail("null value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convertIndirect("SomeString"));
 	}
 
-	public void testConvertIndirectFailBadSeparator()
+	@Test
+	public void testConvertIndirectFailBadSeparatorLeading()
 	{
-		try
-		{
-			manager.convertIndirect(",4,6");
-			fail("starting comma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
-		try
-		{
-			manager.convertIndirect("4,5,");
-			fail("endign comma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
-		try
-		{
-			manager.convertIndirect("3,4,,5");
-			fail("doublecomma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convertIndirect(",4,6"));
 	}
 
-	public void testConvertFailBadSeparator()
+	@Test
+	public void testConvertIndirectFailBadSeparatorTrailing()
 	{
-		try
-		{
-			manager.convert(",4,6");
-			fail("starting comma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
-		try
-		{
-			manager.convert("4,5,");
-			fail("endign comma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
-		try
-		{
-			manager.convert("3,4,,5");
-			fail("doublecomma value should fail");
-		}
-		catch (IllegalArgumentException e)
-		{
-			//ok as well
-		}
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convertIndirect("4,5,"));
 	}
 
+	@Test
+	public void testConvertIndirectFailBadSeparatorMiddle()
+	{
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convertIndirect("3,4,,5"));
+	}
+
+	@Test
+	public void testConvertFailBadSeparatorLeading()
+	{
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convert(",4,6"));
+	}
+
+	@Test
+	public void testConvertFailBadSeparatorTrailing()
+	{
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convert("4,5,"));
+	}
+
+	@Test
+	public void testConvertFailBadSeparatorMiddle()
+	{
+		assertThrows(IllegalArgumentException.class, () -> TestSupport.NUMBER_ARRAY_MANAGER.convert("3,4,,5"));
+	}
+
+	@Test
 	public void testConvert()
 	{
+		ArrayFormatManager<Number> manager = TestSupport.NUMBER_ARRAY_MANAGER;
 		assertTrue(Arrays.equals(new Number[]{}, manager.convert(null)));
 		assertTrue(Arrays.equals(new Number[]{}, manager.convert("")));
-		assertTrue(Arrays.equals(ARR_1, manager.convert("1")));
-		assertTrue(Arrays.equals(ARR_N3, manager.convert("-3")));
-		assertTrue(Arrays.equals(ARR_N3_4_5, manager.convert("-3,4,5")));
-		assertTrue(Arrays.equals(ARR_1P4, manager.convert("1.4")));
-		assertTrue(Arrays.equals(ARR_N3_4P1_5, manager.convert("-3,4.1,5")));
+		assertTrue(Arrays.equals(TestSupport.ARR_1, manager.convert("1")));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3, manager.convert("-3")));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4_5, manager.convert("-3,4,5")));
+		assertTrue(Arrays.equals(TestSupport.ARR_1P4, manager.convert("1.4")));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4P1_5, manager.convert("-3,4.1,5")));
 	}
 
+	@Test
 	public void testUnconvert()
 	{
-		assertEquals("1", manager.unconvert(ARR_1));
-		assertEquals("-3", manager.unconvert(ARR_N3));
-		assertEquals("-3,4,5", manager.unconvert(ARR_N3_4_5));
-		assertEquals("1.4", manager.unconvert(ARR_1P4));
-		assertEquals("-3,4.1,5", manager.unconvert(ARR_N3_4P1_5));
+		ArrayFormatManager<Number> manager = TestSupport.NUMBER_ARRAY_MANAGER;
+		assertEquals("1", manager.unconvert(TestSupport.ARR_1));
+		assertEquals("-3", manager.unconvert(TestSupport.ARR_N3));
+		assertEquals("-3,4,5", manager.unconvert(TestSupport.ARR_N3_4_5));
+		assertEquals("1.4", manager.unconvert(TestSupport.ARR_1P4));
+		assertEquals("-3,4.1,5", manager.unconvert(TestSupport.ARR_N3_4P1_5));
 		//Just to show it's not picky
 		assertEquals("1.4", manager.unconvert(new Double[]{Double.valueOf(1.4)}));
 		assertTrue(Arrays.equals(new Number[]{}, manager.convert(null)));
 		assertTrue(Arrays.equals(new Number[]{}, manager.convert("")));
 	}
 
+	@Test
 	public void testConvertIndirect()
 	{
+		ArrayFormatManager<Number> manager = TestSupport.NUMBER_ARRAY_MANAGER;
 		assertTrue(Arrays.equals(new Number[]{}, manager.convertIndirect(null).get()));
 		assertTrue(Arrays.equals(new Number[]{}, manager.convertIndirect("").get()));
-		assertTrue(Arrays.equals(ARR_1, manager.convertIndirect("1").get()));
-		assertTrue(Arrays.equals(ARR_N3, manager.convertIndirect("-3").get()));
-		assertTrue(Arrays.equals(ARR_1P4, manager.convertIndirect("1.4").get()));
-		assertTrue(Arrays.equals(ARR_N3_4P1_5, manager.convertIndirect("-3,4.1,5").get()));
-		assertTrue(Arrays.equals(ARR_N3_4_5, manager.convertIndirect("-3,4,5").get()));
+		assertTrue(Arrays.equals(TestSupport.ARR_1, manager.convertIndirect("1").get()));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3, manager.convertIndirect("-3").get()));
+		assertTrue(Arrays.equals(TestSupport.ARR_1P4, manager.convertIndirect("1.4").get()));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4P1_5, manager.convertIndirect("-3,4.1,5").get()));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4_5, manager.convertIndirect("-3,4,5").get()));
 
 		assertEquals("", manager.convertIndirect(null).getUnconverted());
 		assertEquals("", manager.convertIndirect("").getUnconverted());
@@ -188,34 +164,116 @@ public class ArrayFormatManagerTest extends TestCase
 		assertEquals("-3,4,5", manager.convertIndirect("-3,4,5").getUnconverted());
 	}
 
+	@Test
 	public void testGetIdentifier()
 	{
-		assertEquals("ARRAY[NUMBER]", manager.getIdentifierType());
+		assertEquals("ARRAY[NUMBER]", TestSupport.NUMBER_ARRAY_MANAGER.getIdentifierType());
 	}
 
+	@Test
 	public void testManagedClass()
 	{
-		assertSame(Number[].class, manager.getManagedClass());
+		assertSame(Number[].class, TestSupport.NUMBER_ARRAY_MANAGER.getManagedClass());
 	}
 
+	@Test
 	public void testHashCodeEquals()
 	{
-		assertEquals(new ArrayFormatManager<>(new NumberManager(), ',').hashCode(), manager.hashCode());
-		//different separator
-		assertFalse(new ArrayFormatManager<>(new NumberManager(), '|').hashCode() == manager.hashCode());
+		ArrayFormatManager<Number> manager = TestSupport.NUMBER_ARRAY_MANAGER;
+		assertEquals(new ArrayFormatManager<>(new NumberManager(), '\n', ',').hashCode(), manager.hashCode());
+		//different list separator
+		assertFalse(new ArrayFormatManager<>(new NumberManager(), '\n', '|').hashCode() == manager.hashCode());
+		//different group separator
+		assertFalse(new ArrayFormatManager<>(new NumberManager(), '-', '|').hashCode() == manager.hashCode());
 		//different underlying
-		assertFalse(new ArrayFormatManager<>(new BooleanManager(), ',').hashCode() == manager.hashCode());
+		assertFalse(new ArrayFormatManager<>(new BooleanManager(), '\n', ',').hashCode() == manager.hashCode());
 		assertFalse(manager.equals(new Object()));
 		assertFalse(manager.equals(new StringManager()));
-		assertTrue(manager.equals(new ArrayFormatManager<>(new NumberManager(), ',')));
-		//different separator
-		assertFalse(manager.equals(new ArrayFormatManager<>(new NumberManager(), '|')));
+		assertTrue(manager.equals(new ArrayFormatManager<>(new NumberManager(), '\n', ',')));
+		//different list separator
+		assertFalse(manager.equals(new ArrayFormatManager<>(new NumberManager(), '\n', '|')));
+		//different group separator
+		assertFalse(manager.equals(new ArrayFormatManager<>(new NumberManager(), '-', '|')));
 		//different underlying
-		assertFalse(manager.equals(new ArrayFormatManager<>(new BooleanManager(), ',')));
+		assertFalse(manager.equals(new ArrayFormatManager<>(new BooleanManager(), '\n', ',')));
 	}
 
+	@Test
 	public void testGetComponent()
 	{
-		assertEquals(new NumberManager(), manager.getComponentManager());
+		assertEquals(new NumberManager(), TestSupport.NUMBER_ARRAY_MANAGER.getComponentManager().get());
 	}
+	
+	@Test
+	public void testEscapeNeeded()
+	{
+		ArrayFormatManager<Number> otherManager =
+				new ArrayFormatManager<>(new NumberManager(), '\n', '|');
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4_5, otherManager.convert("-3|4|5")));
+		assertTrue(Arrays.equals(TestSupport.ARR_N3_4P1_5, otherManager.convert("-3|4.1|5")));
+	}
+
+	@Test
+	public void testIsDirect()
+	{
+		assertTrue(TestSupport.NUMBER_ARRAY_MANAGER.isDirect());
+		assertTrue(new ArrayFormatManager<>(new BooleanManager(), '\n', ',').isDirect());
+		assertTrue(new ArrayFormatManager<>(new StringManager(), '\n', ',').isDirect());
+		assertFalse(new ArrayFormatManager<>(new FormatManager<Object>() {
+
+			@Override
+			public Object convert(String inputStr)
+			{
+				return null;
+			}
+
+			@Override
+			public Indirect<Object> convertIndirect(String inputStr)
+			{
+				return null;
+			}
+
+			@Override
+			public boolean isDirect()
+			{
+				return false;
+			}
+
+			@Override
+			public String unconvert(Object obj)
+			{
+				return null;
+			}
+
+			@Override
+			public Class<Object> getManagedClass()
+			{
+				return Object.class;
+			}
+
+			@Override
+			public String getIdentifierType()
+			{
+				return null;
+			}
+
+			@Override
+			public Optional<FormatManager<?>> getComponentManager()
+			{
+				return Optional.empty();
+			}
+			
+		}, '\n', ',').isDirect());
+	}
+
+	@Test
+	public void testInitializeFrom()
+	{
+		Object value = TestSupport.NUMBER_ARRAY_MANAGER.initializeFrom(new SimpleValueStore());
+		assertTrue(value.getClass().isArray());
+		Object[] array = (Object[]) value;
+		assertEquals(0, array.length);
+	}
+	
 }
+

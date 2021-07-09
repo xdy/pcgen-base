@@ -5,3 +5,6 @@
 /.checkstyle
 /.pmd
 /.ruleset
+/.project
+/.classpath
+PCGen-base.iml

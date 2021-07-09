@@ -17,26 +17,36 @@
  */
 package pcgen.base.graph.inst;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import pcgen.base.graph.base.DirectionalEdge;
 
-import junit.framework.TestCase;
-
-public class DefaultDirectionalHyperEdgeTest extends TestCase
+/**
+ * Test the DefaultDirectionalHyperEdge class
+ */
+public class DefaultDirectionalHyperEdgeTest
 {
 
 	private Integer node1, node2, node3, node4, node5, node6;
 
 	private DefaultDirectionalHyperEdge<Integer> edge1, edge2, edge3, edge4, edge5;
 
-	@Override
-	protected void setUp() throws Exception
+	@BeforeEach
+	void setUp()
 	{
-		super.setUp();
 		node1 = 1;
 		node2 = 2;
 		node3 = 3;
@@ -68,145 +78,62 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 				);
 	}
 
-	public void testDefaultDirectionalHyperEdge()
+	@AfterEach
+	void tearDown()
 	{
-		try
-		{
-			new DefaultDirectionalHyperEdge<Integer>(null, null);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			new DefaultDirectionalHyperEdge<>(
-					null,
-					new ArrayList<>()
-			);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			new DefaultDirectionalHyperEdge<>(
-					new ArrayList<>(),
-					null
-			);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			new DefaultDirectionalHyperEdge<>(
-					new ArrayList<>(),
-					new ArrayList<>()
-			);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			new DefaultDirectionalHyperEdge<>(
-					Arrays.asList(new Integer[]{3, 4, 5}),
-					Arrays.asList(new Integer[]{6, null})
-			);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			new DefaultDirectionalHyperEdge<>(
-					Arrays.asList(new Integer[]{null, 4, 5}),
-					Arrays.asList(new Integer[]{6})
-			);
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
+		node1 = null;
+		node2 = null;
+		node3 = null;
+		node4 = null;
+		node5 = null;
+		node6 = null;
+		edge1 = null;
+		edge2 = null;
+		edge3 = null;
+		edge4 = null;
+		edge5 = null;
 	}
 
+	@Test
+	public void testDefaultDirectionalHyperEdge()
+	{
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<Integer>(null, null));
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<>(null, new ArrayList<>()));
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<>(new ArrayList<>(), null));
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<>(
+					new ArrayList<>(),
+					new ArrayList<>()
+			));
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<>(
+					Arrays.asList(new Integer[]{3, 4, 5}),
+					Arrays.asList(new Integer[]{6, null})
+			));
+		assertThrows(IllegalArgumentException.class, () -> new DefaultDirectionalHyperEdge<>(
+					Arrays.asList(new Integer[]{null, 4, 5}),
+					Arrays.asList(new Integer[]{6})
+			));
+	}
+
+	@Test
 	public void testGetNodeAt()
 	{
 		assertEquals(node1, edge1.getNodeAt(0));
 		assertEquals(node2, edge1.getNodeAt(1));
 		assertEquals(node3, edge1.getNodeAt(2));
-		try
-		{
-			edge1.getNodeAt(-1);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.getNodeAt(3);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
+		assertThrows(IndexOutOfBoundsException.class, () -> edge1.getNodeAt(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> edge1.getNodeAt(3));
 		assertEquals(node5, edge3.getNodeAt(0));
 		assertEquals(node6, edge3.getNodeAt(1));
-		try
-		{
-			edge3.getNodeAt(-1);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
-		try
-		{
-			edge3.getNodeAt(2);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
+		assertThrows(IndexOutOfBoundsException.class, () -> edge3.getNodeAt(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> edge3.getNodeAt(2));
 		assertEquals(node3, edge4.getNodeAt(0));
 		assertEquals(node4, edge4.getNodeAt(1));
 		assertEquals(node1, edge4.getNodeAt(2));
-		try
-		{
-			edge4.getNodeAt(-1);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
-		try
-		{
-			edge4.getNodeAt(3);
-			fail();
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			// OK
-		}
+		assertThrows(IndexOutOfBoundsException.class, () -> edge4.getNodeAt(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> edge4.getNodeAt(3));
 	}
 
+	@Test
 	public void testGetAdjacentNodes()
 	{
 		List<Integer> l = edge5.getAdjacentNodes();
@@ -224,6 +151,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertEquals(5, l.size());
 	}
 
+	@Test
 	public void testIsAdjacentNode()
 	{
 		assertTrue(edge1.isAdjacentNode(node1));
@@ -263,6 +191,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertFalse(edge5.isAdjacentNode(null));
 	}
 
+	@Test
 	public void testGetAdjacentNodeCount()
 	{
 		assertEquals(3, edge1.getAdjacentNodeCount());
@@ -272,6 +201,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertEquals(4, edge5.getAdjacentNodeCount());
 	}
 
+	@Test
 	public void testGetNodeInterfaceType()
 	{
 		assertEquals(DirectionalEdge.SOURCE, edge5.getNodeInterfaceType(node1));
@@ -284,6 +214,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 			edge5.getNodeInterfaceType(null));
 	}
 
+	@Test
 	public void testGetSinkNodes()
 	{
 		Collection<Integer> l = edge1.getSinkNodes();
@@ -311,6 +242,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertTrue(l.contains(node3));
 	}
 
+	@Test
 	public void testGetSourceNodes()
 	{
 		Collection<Integer> l = edge1.getSourceNodes();
@@ -338,69 +270,23 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertTrue(l.contains(node3));
 	}
 
+	@Test
 	public void testCreateReplacementEdge()
 	{
-		try
-		{
-			edge1.createReplacementEdge(null, null);
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException iae)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.createReplacementEdge(null, new ArrayList<>());
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException iae)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.createReplacementEdge(new ArrayList<>(), null);
-			fail();
-		}
-		catch (IllegalArgumentException | NullPointerException iae)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.createReplacementEdge(
+		assertThrows(NullPointerException.class, () -> edge1.createReplacementEdge(null, null));
+		assertThrows(NullPointerException.class, () -> edge1.createReplacementEdge(null, new ArrayList<>()));
+		assertThrows(NullPointerException.class, () -> edge1.createReplacementEdge(new ArrayList<>(), null));
+		assertThrows(IllegalArgumentException.class, () -> edge1.createReplacementEdge(
 					new ArrayList<>(),
-					new ArrayList<>());
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.createReplacementEdge(Arrays.asList(new Integer[]{3, 4, 5}),
-				Arrays.asList(new Integer[]{6, null}));
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
-		try
-		{
-			edge1.createReplacementEdge(
+					new ArrayList<>()));
+		assertThrows(IllegalArgumentException.class, () -> edge1.createReplacementEdge(Arrays.asList(new Integer[]{3, 4, 5}),
+				Arrays.asList(new Integer[]{6, null})));
+		assertThrows(IllegalArgumentException.class, () -> edge1.createReplacementEdge(
 				Arrays.asList(new Integer[]{null, 4, 5}),
-				Arrays.asList(new Integer[]{6}));
-			fail();
-		}
-		catch (IllegalArgumentException iae)
-		{
-			// OK
-		}
+				Arrays.asList(new Integer[]{6})));
 	}
 
+	@Test
 	public void testCreateReplacementEdgeSemantics()
 	{
 		List<Integer> sourceL =
@@ -438,6 +324,7 @@ public class DefaultDirectionalHyperEdgeTest extends TestCase
 		assertTrue(l.contains(node5));
 	}
 
+	@Test
 	public void testConstructorSemantics()
 	{
 		List<Integer> sourceL =

@@ -386,8 +386,7 @@ public class DoubleKeyMapToList<K1, K2, V> implements Cloneable
 	 * @param key1
 	 *            The primary key to retrieve keys for.
 	 * 
-	 * @return A <tt>Set</tt> of secondary key objects for the given primary
-	 *         key.
+	 * @return A Set of secondary key objects for the given primary key.
 	 */
 	public Set<K2> getSecondaryKeySet(K1 key1)
 	{
@@ -455,13 +454,13 @@ public class DoubleKeyMapToList<K1, K2, V> implements Cloneable
 		DoubleKeyMapToList<K1, K2, V> dkm =
 				(DoubleKeyMapToList<K1, K2, V>) super.clone();
 		dkm.mtmtl = createGlobalMap();
-		for (K1 key : mtmtl.keySet())
+		for (Map.Entry<K1, MapToList<K2, V>> entry : mtmtl.entrySet())
 		{
-			MapToList<K2, V> currentMTL = mtmtl.get(key);
+			MapToList<K2, V> currentMTL = entry.getValue();
 			MapToList<K2, V> newMTL =
 					GenericMapToList.getMapToList(secondClass);
 			newMTL.addAllLists(currentMTL);
-			dkm.mtmtl.put(key, newMTL);
+			dkm.mtmtl.put(entry.getKey(), newMTL);
 		}
 		return dkm;
 	}
@@ -541,15 +540,9 @@ public class DoubleKeyMapToList<K1, K2, V> implements Cloneable
 	{
 		try
 		{
-			return firstClass.newInstance();
+			return firstClass.getConstructor().newInstance();
 		}
-		catch (InstantiationException e)
-		{
-			throw new IllegalArgumentException(
-				"Class for DoubleKeyMap must possess "
-					+ "a zero-argument constructor", e);
-		}
-		catch (IllegalAccessException e)
+		catch (ReflectiveOperationException e)
 		{
 			throw new IllegalArgumentException(
 				"Class for DoubleKeyMap must possess "

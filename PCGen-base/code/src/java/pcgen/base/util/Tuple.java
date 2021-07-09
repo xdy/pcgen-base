@@ -69,5 +69,9 @@ public class Tuple<F, S>
 		return second;
 	}
 	
-	
+	@Override
+	public String toString()
+	{
+		return "<(" + first + "," + second + ")>";
+	}
 }
